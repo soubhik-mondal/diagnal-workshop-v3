@@ -1,0 +1,27 @@
+{
+  "name": "diagnal-workshop-v3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/soubhik-mondal/diagnal-workshop-v3.git"
+  },
+  "author": "Soubhik Mondal <souvikmondal.j@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/soubhik-mondal/diagnal-workshop-v3/issues"
+  },
+  "homepage": "https://github.com/soubhik-mondal/diagnal-workshop-v3#readme",
+  "devDependencies": {
+    "aws-sdk": "^2.880.0",
+    "serverless": "^2.33.1"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.5",
+    "node-fetch": "^2.6.1"
+  }
+}
