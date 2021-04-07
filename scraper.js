@@ -362,6 +362,9 @@ class Scraper {
           break;
       }
     });
+    if (!metaData.description) {
+      delete metaData.description; // Deleting the description if it is empty
+    }
     delete metaData.raw; // Deleting the raw meta tag data for now
     delete metaData.ogMetaData; // Deleting the raw og meta tag data for now
     return metaData;
