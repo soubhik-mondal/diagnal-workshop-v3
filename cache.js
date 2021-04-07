@@ -2,43 +2,53 @@
 
 const DynamoDB = require("aws-sdk").DynamoDB.DocumentClient;
 
-const db = new DynamoDB({
-  region: process.env.REGION,
-});
-
-module.exports.get = function (url) {
-  let params = {
-    TableName: process.env.DYNAMODB_TABLE_NAME,
-    Key: {
-      url: url,
-    },
-  };
-  return new Promise((resolve, reject) => {
-    db.get(params, (error, data) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(data.Item.metaData);
-      }
+class Cache {
+  constructor(tableName, region) {
+    this.tableName = tableName;
+    this.region = region;
+    this.db = new DynamoDB({
+      region: region,
     });
-  });
-};
-
-module.exports.set = function (url, data) {
-  let params = {
-    TableName: process.env.DYNAMODB_TABLE_NAME,
-    Item: {
-      url: url,
-      metaData: data,
-    },
-  };
-  return new Promise((resolve, reject) => {
-    db.put(params, (error) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve();
-      }
+  }
+  get(url) {
+    let params = {
+      TableName: this.tableName,
+      Key: {
+        url: url,
+      },
+    };
+    return new Promise((resolve, reject) => {
+      this.db.get(params, (error, data) => {
+        if (error) {
+          reject(error);
+        } else {
+          if (data.Item) {
+            resolve(data.Item.metaData);
+          } else {
+            resolve(data.Item);
+          }
+        }
+      });
     });
-  });
-};
+  }
+  set(url, data) {
+    let params = {
+      TableName: this.tableName,
+      Item: {
+        url: url,
+        metaData: data,
+      },
+    };
+    return new Promise((resolve, reject) => {
+      this.db.put(params, (error) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+}
+
+module.exports = Cache;

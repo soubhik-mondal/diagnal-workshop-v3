@@ -1,55 +1,34 @@
 "use strict";
 
-const cache = require("./cache");
+const Cache = require("./cache");
+const myCache = new Cache(process.env.DYNAMODB_TABLE_NAME, process.env.REGION);
 
-const scrapper = require("./scrapper");
+const Scrapper = require("./scrapper");
+const myScrapper = new Scrapper();
 
-function parseRequest(event) {
-  let body, message;
-  if (!event.headers) {
-    message = 'Headers missing';
-  } else if (!event.headers["content-type"]) {
-    message = 'Header "content-type" missing';
-  } else if (event.headers["content-type"] !== "application/json") {
-    message = 'Header "content-type" must be "application/json"';
-  } else if (!event.body) {
-    message = "Body missing";
-  } else {
-    try {
-      body = JSON.parse(event.body);
-      if (!body.url) {
-        message = "Missing URL";
-      } else if (body.url && !body.url.length) {
-        message = "Invalid URL";
-      }
-    } catch (e) {
-      console.error(e);
-      message = "Invalid JSON";
-    }
-  }
-  if (message) {
-    let error = new Error(message);
-    error.type = "parseRequest";
-    throw error;
-  }
-  return body.url;
-}
+const Fetcher = require("./fetcher");
+const myFetcher = new Fetcher();
+
+const RequestParser = require("./request-parser");
+const myRequestParser = new RequestParser();
 
 module.exports.getMetaData = async function (event) {
   try {
-    let url = parseRequest(event);
-    let metaData = await cache.get(url);
-    if (!metaData) {
-      metaData = await scrapper.scrap(url);
-      await cache.set(url, metaData);
+    let url = myRequestParser.parse(event);
+    let processedMetaData = await myCache.get(url);
+    if (!processedMetaData) {
+      let html = await myFetcher.get(url);
+      let unprocessedMetaData = await myScrapper.scrape(url, html);
+      processedMetaData = await myScrapper.parse(unprocessedMetaData);
+      await myCache.set(url, processedMetaData);
     }
     return {
       statusCode: 200,
-      body: JSON.stringify(metaData, null, 2),
+      body: JSON.stringify(processedMetaData, null, 2),
     };
   } catch (error) {
     switch (error.type) {
-      case "parseRequest":
+      case "request-parser":
         return {
           statusCode: 400,
           body: JSON.stringify(
