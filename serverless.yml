@@ -11,13 +11,11 @@ provider:
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - dynamodb:Query
         - dynamodb:GetItem
         - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE_NAME}"
   environment:
+    REGION: ${opt:region, self:provider.region}
     DYNAMODB_TABLE_NAME: ScrappedSites
 
 # you can add packaging information here
@@ -45,18 +43,9 @@ resources:
           -
             AttributeName: url
             AttributeType: S
-          -
-            AttributeName: createdAt
-            AttributeType: N
-          -
-            AttributeName: metaData
-            AttributeType: S
         BillingMode: PAY_PER_REQUEST
         KeySchema:
           -
             AttributeName: url
             KeyType: HASH
-          -
-            AttributeName: createdAt
-            KeyType: RANGE
         TableName: ${self:provider.environment.DYNAMODB_TABLE_NAME}

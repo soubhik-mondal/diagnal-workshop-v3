@@ -1,37 +1,44 @@
-'use strict';
+"use strict";
 
-const DynamoDB = require('aws-sdk').DynamoDB.DocumentClient;
+const DynamoDB = require("aws-sdk").DynamoDB.DocumentClient;
 
 const db = new DynamoDB({
-  region: process.env.REGION
+  region: process.env.REGION,
 });
 
-module.exports.get = function(key) {
+module.exports.get = function (url) {
   let params = {
     TableName: process.env.DYNAMODB_TABLE_NAME,
     Key: {
-      id: key
-    }
+      url: url,
+    },
   };
   return new Promise((resolve, reject) => {
     db.get(params, (error, data) => {
-      if (error) return reject(error);
-      else return resolve(data.Item);
+      if (error) {
+        reject(error);
+      } else {
+        resolve(data.Item.metaData);
+      }
     });
   });
 };
 
-module.exports.set = function(key, data) {
+module.exports.set = function (url, data) {
   let params = {
     TableName: process.env.DYNAMODB_TABLE_NAME,
     Item: {
-      id: key
-    }
+      url: url,
+      metaData: data,
+    },
   };
   return new Promise((resolve, reject) => {
     db.put(params, (error) => {
-      if (error) return reject(error);
-      else return resolve();
+      if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
     });
   });
 };
