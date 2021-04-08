@@ -18,13 +18,14 @@ provider:
     REGION: ${opt:region, self:provider.region}
     DYNAMODB_TABLE_NAME: ScrappedSites
 
-# you can add packaging information here
-#package:
-#  patterns:
-#    - '!exclude-me.js'
-#    - '!exclude-me-dir/**'
-#    - include-me.js
-#    - include-me-dir/**
+package:
+ patterns:
+   - '!coverage'
+   - '!tests'
+   - '!README.md'
+   - '!LICENSE'
+   - '!.npmignore'
+   - '!.nyc_output'
 
 functions:
   metaDataScrapper:
