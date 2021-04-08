@@ -44,6 +44,9 @@ Here's the gist of the algorithm in handler.js -
 1. This code is dependent on `node-fetch` to fetch the HTML page. It may be possible to replace this with custom code which depends on `http` or `https` libraries, however this will introduce overheard and boilerplate code.
 2. If code footprint (~520kB) is too high, we may be able to utilize [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html) to put the node_modules into a different layer.
 3. We can add TTL configuration in DynamoDB in order to invalidate older data from time to time.
+4. There is a feature to forward the raw meta tags in the response to client (similar to the [Facebook Debug Tool](https://developers.facebook.com/tools/debug)), however this is commented out for now. The code is in scraper.js.
+5. We can add `console.error(error);` in the `catch` blocks to log the errors in CloudWatch, however this is commented out for now in order to improve speed/performance.
+6. We can use `minify` or `uglify` to reduce the code base further, however this will make bug hunting much harder without source maps.
 
 ## Note
 Although the given example suggests the output format as:
