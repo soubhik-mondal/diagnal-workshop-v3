@@ -53,6 +53,7 @@ class Cache {
     return new Promise((resolve, reject) => {
       this.db.get(params, (error, data) => {
         if (error) {
+          error.type = "cache.get";
           reject(error);
         } else {
           if (data.Item) {
@@ -88,6 +89,7 @@ class Cache {
     return new Promise((resolve, reject) => {
       this.db.put(params, (error) => {
         if (error) {
+          error.type = "cache.set";
           reject(error);
         } else {
           resolve();
