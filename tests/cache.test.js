@@ -30,15 +30,15 @@ context("Cache", function () {
     before("setup", function () {
       sandbox = sinon.createSandbox();
       myCache = new Cache("testTableName", "testRegion");
-      myCache.db = {
-        get: sandbox.spy(),
-        set: sandbox.spy(),
-      };
     });
     afterEach("teardown", function () {
       sandbox.restore();
     });
     it("should set the params correctly", function () {
+      myCache.db = {
+        get: sandbox.spy(),
+        put: sandbox.spy(),
+      };
       myCache.get("testURL");
       sinon.assert.match(myCache.db.get.calledOnce, true);
       sinon.assert.match(myCache.db.get.firstCall.args.length, 2);
@@ -51,23 +51,97 @@ context("Cache", function () {
       });
     });
     it("should handle error correctly", function () {
-      myCache.get("testURL");
-      sinon.assert.match(typeof myCache.db.get.firstCall.args[1], "function");
-            
-
+      myCache.db = {
+        get: sandbox.stub(),
+        put: sandbox.stub(),
+      };
+      myCache.db.get.callsArgWith(1, new Error("testError"));
+      return myCache
+        .get("testURL")
+        .then(() => sinon.assert.fail("SHOULD RETURN ERROR"))
+        .catch((error) => {
+          sinon.assert.match(error.constructor.name, "Error");
+          sinon.assert.match(error.type, "cache.get");
+          require("assert").equal(error.message, "testError");
+        });
     });
-    it("should handle cache hit correctly", function () {});
-    it("should handle cache miss correctly", function () {});
+    it("should handle cache hit correctly", function () {
+      myCache.db = {
+        get: sandbox.stub(),
+        put: sandbox.stub(),
+      };
+      myCache.db.get.callsArgWith(1, null, {
+        Item: {
+          metaData: "someData",
+        },
+      });
+      return myCache.get("testURL").then((data) => {
+        sinon.assert.match(data, "someData");
+      });
+    });
+    it("should handle cache miss correctly", function () {
+      myCache.db = {
+        get: sandbox.stub(),
+        put: sandbox.stub(),
+      };
+      myCache.db.get.callsArgWith(1, null, {
+        Item: null,
+      });
+      return myCache.get("testURL").then((data) => {
+        sinon.assert.match(data, null);
+      });
+    });
   });
   describe("#set()", function () {
-    let myCache, dbGet;
+    let sandbox, myCache;
     before("setup", function () {
+      sandbox = sinon.createSandbox();
       myCache = new Cache("testTableName", "testRegion");
-      dbGet = sinon.stub(myCache.db, "get");
     });
-    after("teardown", function () {});
-    it("should set the params correctly", function () {});
-    it("should handle error correctly", function () {});
-    it("should handle cache set correctly", function () {});
+    afterEach("teardown", function () {
+      sandbox.restore();
+    });
+    it("should set the params correctly", function () {
+      myCache.db = {
+        get: sandbox.spy(),
+        put: sandbox.spy(),
+      };
+      myCache.set("testURL", "someData");
+      sinon.assert.match(myCache.db.put.calledOnce, true);
+      sinon.assert.match(myCache.db.put.firstCall.args.length, 2);
+      sinon.assert.match(typeof myCache.db.put.firstCall.args[0], "object");
+      sinon.assert.match(myCache.db.put.firstCall.args[0], {
+        TableName: "testTableName",
+        Item: {
+          url: "testURL",
+          metaData: "someData",
+        },
+      });
+    });
+    it("should handle error correctly", function () {
+      myCache.db = {
+        get: sandbox.stub(),
+        put: sandbox.stub(),
+      };
+      myCache.db.put.callsArgWith(1, new Error("testError"));
+      return myCache
+        .set("testURL", "someData")
+        .then(() => sinon.assert.fail("SHOULD RETURN ERROR"))
+        .catch((error) => {
+          sinon.assert.match(error.constructor.name, "Error");
+          sinon.assert.match(error.type, "cache.set");
+          require("assert").equal(error.message, "testError");
+        });
+    });
+    it("should handle cache set correctly", function () {
+      myCache.db = {
+        get: sandbox.stub(),
+        put: sandbox.stub(),
+      };
+      myCache.db.put.callsArgWith(1, null, "success");
+      return myCache.set("testURL", "someData").then((data) => {
+        sinon.assert.match(data, undefined);
+      });
+    });
   });
 });
