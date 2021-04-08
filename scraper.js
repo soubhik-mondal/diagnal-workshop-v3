@@ -330,26 +330,6 @@ class Scraper {
             metaData.audios[lastAudio].type = each.content;
           }
           break;
-        case "og:audio:width":
-          /**
-           * If audios array exist then attach this to the last audio object,
-           * otherwise ignore it.
-           */
-          if (metaData.audios) {
-            let lastAudio = metaData.audios.length - 1;
-            metaData.audios[lastAudio].width = each.content;
-          }
-          break;
-        case "og:audio:height":
-          /**
-           * If audios array exist then attach this to the last audio object,
-           * otherwise ignore it.
-           */
-          if (metaData.audios) {
-            let lastAudio = metaData.audios.length - 1;
-            metaData.audios[lastAudio].height = each.content;
-          }
-          break;
         case "og:audio:alt":
           /**
            * If audios array exist then attach this to the last audio object,
@@ -362,6 +342,9 @@ class Scraper {
           break;
       }
     });
+    if (!metaData.title) {
+      delete metaData.title; // Deleting the title if it is empty
+    }
     if (!metaData.description) {
       delete metaData.description; // Deleting the description if it is empty
     }
